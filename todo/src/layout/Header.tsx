@@ -1,28 +1,34 @@
 import { fetchAllTodos } from "@/services/fetchAllTodos";
-import { Todo } from "@/types/placeholder";
+import { useTodosStore } from "@/store/useTodoStore";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState, type FC } from "react";
+import { useEffect, type FC } from "react";
 
 interface HeaderProps {}
 
 export const Header: FC<HeaderProps> = ({}) => {
-  const [todos, setTodos] = useState<Todo[]>([]);
-
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["todos"],
     queryFn: () => fetchAllTodos(),
   });
 
+  const { setLoading, setTodosData } = useTodosStore();
+
+  useEffect(() => {
+    setLoading(isLoading);
+  }, [isLoading]);
+
   useEffect(() => {
     if (data) {
-      setTodos(data);
+      setTodosData(data);
       return;
     }
+    setTodosData(undefined);
+  }, [data, isLoading]);
 
-    setTodos([]);
-  }, [data]);
-
-  console.log(todos);
-
-  return <div className='text-red-500 text-center'>TODO List</div>;
+  return (
+    <div>
+      <div className='text-red-500 text-center'>TODO List</div>
+      {isLoading && <h1>LOADING</h1>}
+    </div>
+  );
 };
